@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id  Int     @id @default(autoincrement())
+  email    String  @unique
+  password String?
+  name     String?
+  role     String  @default("admin")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Categories {
+  category_id   Int    @id @default(autoincrement())
+  category_name String @db.VarChar(100)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Products Products[]
+}
+
+//ต้องมีรูป
+model Products {
+  product_id    Int     @id @default(autoincrement())
+  product_name  String  @db.VarChar(100)
+  description   String? @db.VarChar(400)
+  startingPrice String? @db.VarChar(100)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  //relation
+  category_id Int //FK
+  categories  Categories @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
+
+  images ProductImage[]
+}
+
+model ProductImage {
+  id         Int      @id @default(autoincrement())
+  asset_id   String
+  public_id  String
+  url        String
+  secure_url String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  //relation
+  product_id Int
+  products   Products @relation(fields: [product_id], references: [product_id], onDelete: Cascade)
+}
+
+
+//ต้องมีรูป
+model Content {
+  content_id   Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relation to ContentImage
+  images ContentImage[]
+}
+
+model ContentImage {
+  id         Int      @id @default(autoincrement())
+  asset_id   String
+  public_id  String
+  url        String
+  secure_url String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Foreign key to Content
+  content_id Int
+  content    Content @relation(fields: [content_id], references: [content_id], onDelete: Cascade)
+}
